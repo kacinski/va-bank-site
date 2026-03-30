@@ -1,65 +1,275 @@
-import Image from "next/image";
+import { promises as fs } from "fs";
+import path from "path";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function Home() {
+// SVG mask for deckled edge
+const DeckledMask = () => (
+  <svg width="0" height="0">
+    <defs>
+      <mask id="deckle" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+        <rect x="0" y="0" width="1" height="1" fill="white" />
+        <path d="M0,0 Q0.02,0.04 0.04,0 Q0.08,0.06 0.12,0 Q0.16,0.04 0.2,0 Q0.24,0.06 0.28,0 Q0.32,0.04 0.36,0 Q0.4,0.06 0.44,0 Q0.48,0.04 0.52,0 Q0.56,0.06 0.6,0 Q0.64,0.04 0.68,0 Q0.72,0.06 0.76,0 Q0.8,0.04 0.84,0 Q0.88,0.06 0.92,0 Q0.96,0.04 1,0 V1 Q0.96,0.96 0.92,1 Q0.88,0.94 0.84,1 Q0.8,0.96 0.76,1 Q0.72,0.94 0.68,1 Q0.64,0.96 0.6,1 Q0.56,0.94 0.52,1 Q0.48,0.96 0.44,1 Q0.4,0.94 0.36,1 Q0.32,0.96 0.28,1 Q0.24,0.94 0.2,1 Q0.16,0.96 0.12,1 Q0.08,0.94 0.04,1 Q0.02,0.96 0,1 Z" fill="black" />
+      </mask>
+    </defs>
+  </svg>
+);
+
+async function getGamesData() {
+  const filePath = path.join(process.cwd(), "data/games.json");
+  const file = await fs.readFile(filePath, "utf-8");
+  const data = JSON.parse(file);
+  return {
+    upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
+    results: typeof data.results === "object" && data.results !== null ? data.results : {},
+  };
+}
+
+async function getRandomFactWithTranslation() {
+  try {
+    const res = await fetch("https://uselessfacts.jsph.pl/random.json?language=en", { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch fact");
+    const data = await res.json();
+    const original = data.text || "Факт не найден.";
+    let translated = "";
+    try {
+      const tr = await fetch("https://libretranslate.de/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q: original, source: "en", target: "ru", format: "text" })
+      });
+      if (tr.ok) {
+        const trData = await tr.json();
+        translated = trData.translatedText || "";
+      }
+    } catch {}
+    return { original, translated };
+  } catch {
+    return { original: "Не удалось загрузить исторический факт.", translated: "" };
+  }
+}
+
+export default async function HomePage() {
+  const [{ upcoming, results }, factObj] = await Promise.all([
+    getGamesData(),
+    getRandomFactWithTranslation()
+  ]);
+
+  // If results is an array (new format), extract game numbers dynamically
+  const gameNumbers = Array.isArray(results) && results.length > 0
+    ? Object.keys(results[0]).filter(k => k.startsWith("game"))
+    : [];
+
+  // URL to your muted, sepia-toned, cluttered newspaper background image
+  const backgroundUrl = "/cluttered-newspapers.jpg";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+    <>
+      {/* Muted, sepia, blurred, cluttered newspaper background */}
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 w-full h-full"
+        style={{
+          backgroundImage: `url('${backgroundUrl}')`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'repeat',
+          backgroundPosition: 'center',
+          filter: 'sepia(0.7) brightness(0.85) blur(1px)',
+          opacity: 1,
+        }}
+      />
+      {/* Paper grain overlay for all layers */}
+      <div
+        aria-hidden
+        className="fixed inset-0 pointer-events-none -z-10"
+        style={{
+          opacity: 0.18,
+          backgroundImage:
+            "url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\' fill=\'none\'><filter id=\'n\' x=\'0\' y=\'0\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/></filter><rect width=\'120\' height=\'120\' filter=\'url(%23n)\' opacity=\'0.5\'/></svg>')",
+          backgroundSize: '220px 220px',
+          mixBlendMode: 'multiply',
+        }}
+      />
+      <main className="min-h-screen w-full flex justify-center items-start relative">
+        <div className="max-w-4xl mx-auto bg-[#F4F1E1] text-[#2C2416] border-[6px] border-double border-[#2C2416] p-10 md:p-16 shadow-[15px_15px_0px_rgba(44,36,22,0.15)] rounded-none">
+          {/* Decorative Header */}
+          <section className="text-center mb-8">
+            {/* --- NEW GRID HEADER --- */}
+            {(() => {
+              // Tsarist-style months
+              const months = [
+                "января", "февраля", "марта", "апрѣля", "мая", "іюнѧ", "іюля", "августа", "сентября", "октября", "ноября", "декабря"
+              ];
+              const now = new Date();
+              const day = now.getDate();
+              const month = months[now.getMonth()];
+              const year = now.getFullYear();
+              const datelineCity = `Кішиневъ`;
+              const datelineDate = `${day} ${month} ${year} г.`;
+              return (
+                <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center w-full mb-2">
+                  {/* Left: Logo */}
+                  <div className="flex justify-start">
+                    <img
+                      src="/images/bessarabskie-vedomosti.png"
+                      alt="Бессарабскія Вѣдомости"
+                      className="h-32 w-auto object-contain max-w-xs mx-auto"
+                    />
+                  </div>
+                  {/* Center: Title */}
+                  <div className="flex justify-center">
+                    <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-widest whitespace-nowrap">
+                      Ва Банк<span className="text-imperial-gold text-6xl align-middle">Ъ</span>
+                    </h1>
+                  </div>
+                  {/* Right: Dynamic Date */}
+                  <div className="flex flex-col items-end justify-end leading-tight">
+                    <span className="font-serif text-[#2C2416]/90 text-sm md:text-base select-none">
+                      {datelineCity}
+                    </span>
+                    <span className="font-serif text-[#2C2416]/90 text-sm md:text-base select-none">
+                      {datelineDate}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+            <div className="my-2 text-2xl select-none">
+              ☙ ━━━━━ ❦ ━━━━━ ❧
+            </div>
+            <p className="mt-2 text-xl italic">
+              Имперский интеллектуальный салонъ
+            </p>
+            <div className="my-2 text-2xl select-none">
+              ☙ ━━━━━ ❦ ━━━━━ ❧
+            </div>
+          </section>
+
+          {/* Upcoming Games Table */}
+          <section className="mb-10">
+            <div className="mb-4 flex items-center gap-2">
+              <h2 className="font-heading text-2xl">Ближайшие игры</h2>
+              <span className="flex-1" />
+            </div>
+            <div className="overflow-x-auto border-y-4 border-[#2C2416] rounded-none">
+              <table className="w-full border-collapse rounded-none">
+                <thead>
+                  <tr>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4">№</th>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4">Дата</th>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4">День</th>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4">Время</th>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4">Место</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcoming.length > 0 ? (
+                    upcoming.map((game: { number: number; dateTime: string; location: string }, idx: number) => {
+                      const match = game.dateTime.match(/^(.*?)\s*\((.*?)\),\s*(\d{1,2}:\d{2})$/);
+                      const date = match ? match[1] : game.dateTime;
+                      const weekday = match ? match[2] : "";
+                      const time = match ? match[3] : "";
+                      // Strike through the first 3 games (already played)
+                      const isPast = idx < 3;
+                      const tdClass = "border-b border-dashed border-[#2C2416]/40 py-3" + (isPast ? " line-through text-[#A9A9A9]" : "");
+                      return (
+                        <tr key={game.number} className="rounded-none">
+                          <td className={tdClass}>{game.number}</td>
+                          <td className={tdClass}>{date}</td>
+                          <td className={tdClass}>{weekday}</td>
+                          <td className={tdClass}>{time}</td>
+                          <td className={tdClass}>{game.location}</td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr className="rounded-none">
+                      <td colSpan={5} className="text-center border-b border-dashed border-[#2C2416]/40 py-3">Нет предстоящих игр.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="my-8 text-2xl text-center select-none">
+            ☙ ━━━━━ ❦ ━━━━━ ❧
+          </div>
+
+          {/* Results Table */}
+          <section className="mb-10">
+            <div className="mb-4 flex items-center gap-2">
+              <h2 className="font-heading text-2xl">Результаты прошедших игръ</h2>
+              <span className="flex-1" />
+            </div>
+            <div className="overflow-x-auto border-y-4 border-[#2C2416] rounded-none">
+              <table className="w-full border-collapse rounded-none">
+                <thead>
+                  <tr>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4 text-center">Место</th>
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4 text-left pl-6">Команда</th>
+                    {gameNumbers.map((num, idx) => (
+                      <th
+                        key={num}
+                        className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4 text-center"
+                      >
+                        Игра {idx + 1}
+                      </th>
+                    ))}
+                    <th className="uppercase tracking-widest text-xs font-bold border-b-2 border-[#2C2416] text-[#2C2416] py-4 text-center">Итого</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.isArray(results) && results.length > 0 ? (
+                    results.map((row) => {
+                      const isVaBank = row.team.trim().toLowerCase().includes("ва-банк");
+                      return (
+                        <tr key={row.team} className={isVaBank ? "bg-[#F9E9A9]/80" : ""}>
+                          <td className="font-heading font-bold border-b border-dashed border-[#2C2416]/40 py-3 text-center">{row.rank}</td>
+                          <td className={"font-heading font-bold border-b border-dashed border-[#2C2416]/40 py-3 text-left pl-6" + (isVaBank ? " text-imperial-burgundy" : "")}>{row.team}</td>
+                          {gameNumbers.map((num) => (
+                            <td className="border-b border-dashed border-[#2C2416]/40 py-3 text-center" key={num}>
+                              {row[num] !== null && row[num] !== undefined ? row[num] : "—"}
+                            </td>
+                          ))}
+                          <td className="font-bold border-b border-dashed border-[#2C2416]/40 py-3 text-center">
+                            {row.total !== null && row.total !== undefined ? row.total : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={gameNumbers.length + 3} className="text-center border-b border-dashed border-[#2C2416]/40 py-3">Нет данных.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="my-8 text-2xl text-center select-none">
+            ☙ ━━━━━ ❦ ━━━━━ ❧
+          </div>
+
+          {/* Fact Widget */}
+          <section className="flex justify-center">
+            <div className="max-w-xl w-full border-[6px] border-double border-[#2C2416] bg-[#F4F1E1] shadow-[15px_15px_0px_rgba(44,36,22,0.15)] p-6 md:p-8 rounded-none">
+              <div className="pb-2">
+                <div className="font-heading text-[#2C2416] text-xl font-bold">Исторический фактъ</div>
+              </div>
+              <div>
+                <blockquote className="italic text-lg leading-relaxed">
+                  “{factObj.original}”
+                </blockquote>
+                {factObj.translated && (
+                  <p className="mt-2 text-[#2C2416]/80 text-base">{factObj.translated}</p>
+                )}
+              </div>
+            </div>
+          </section>
         </div>
       </main>
-    </div>
+    </>
   );
 }

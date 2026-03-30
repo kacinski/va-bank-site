@@ -1,0 +1,33 @@
+{
+  "upcoming": [
+    { "number": 1, "dateTime": "31 ianuarie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 2, "dateTime": "1 martie (duminică), 17:00", "location": "Palatul Republicii" },
+    { "number": 3, "dateTime": "28 martie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 4, "dateTime": "18 aprilie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 5, "dateTime": "23 mai (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 6, "dateTime": "27 iunie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 7, "dateTime": "25 iulie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 8, "dateTime": "29 august (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 9, "dateTime": "26 septembrie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 10, "dateTime": "31 octombrie (sâmbătă), 17:00", "location": "Palatul Republicii" },
+    { "number": 11, "dateTime": "22 noiembrie (duminică), 17:00", "location": "Palatul Republicii" },
+    { "number": 12, "dateTime": "26 decembrie (sâmbătă), 17:00", "location": "Palatul Republicii" }
+  ],
+  "results": [
+    { "rank": 1, "team": "Wine IT", "game1": 24, "game2": 25, "game3": 22, "total": 71 },
+    { "rank": 2, "team": "Ва-банк", "game1": 20, "game2": 21, "game3": 18, "total": 59 },
+    { "rank": 3, "team": "Quantum", "game1": 19, "game2": 18, "game3": 20, "total": 57 },
+    { "rank": 4, "team": "Отряд соседей", "game1": 14, "game2": 22, "game3": 20, "total": 56 },
+    { "rank": 5, "team": "Синий гараж", "game1": 15, "game2": 24, "game3": 16, "total": 55 },
+    { "rank": 6, "team": "Чилийцы", "game1": 14, "game2": 22, "game3": 19, "total": 55 },
+    { "rank": 7, "team": "In Vinum Veritas", "game1": 17, "game2": 20, "game3": 15, "total": 52 },
+    { "rank": 8, "team": "Одиссея", "game1": 18, "game2": 18, "game3": 16, "total": 52 },
+    { "rank": 9, "team": "Джентльмены с удачей", "game1": 14, "game2": 14, "game3": 22, "total": 50 },
+    { "rank": 10, "team": "Фортуна", "game1": 13, "game2": 20, "game3": 17, "total": 50 },
+    { "rank": 11, "team": "Актив", "game1": 15, "game2": 19, "game3": 15, "total": 49 },
+    { "rank": 12, "team": "Шерлоки", "game1": 13, "game2": 25, "game3": 11, "total": 49 },
+    { "rank": 13, "team": "Клуб любителей", "game1": 11, "game2": 21, "game3": 16, "total": 48 },
+    { "rank": 14, "team": "Брызги шампанского", "game1": 17, "game2": 15, "game3": 13, "total": 45 },
+    { "rank": 15, "team": "AMBahus", "game1": 13, "game2": 14, "game3": null, "total": null }
+  ]
+}
