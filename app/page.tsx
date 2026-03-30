@@ -91,7 +91,7 @@ export default async function HomePage() {
         }}
       />
       <main className="min-h-screen w-full flex justify-center items-start relative">
-        <div className="max-w-4xl mx-auto bg-[#F4F1E1] text-[#2C2416] border-[6px] border-double border-[#2C2416] p-10 md:p-16 shadow-[15px_15px_0px_rgba(44,36,22,0.15)] rounded-none">
+        <div className="max-w-4xl mx-auto bg-[#F4F1E1] text-[#2C2416] border-[6px] border-double border-[#2C2416] p-10 md:p-16 shadow-[15px_15px_0px_rgba(44,36,22,0.15)] rounded-none relative">
           {/* Decorative Header */}
           <section className="text-center mb-8">
             {/* --- NEW GRID HEADER --- */}
@@ -192,6 +192,14 @@ export default async function HomePage() {
             </div>
           </section>
 
+          {/* Vintage Bookmark Gallery Link */}
+          <a
+            href="/gallery"
+            className="absolute top-0 right-6 md:right-12 bg-[#2C2416] text-[#F4F1E1] px-4 py-3 shadow-md rounded-b-lg font-serif tracking-widest uppercase text-xs md:text-sm font-bold hover:pt-4 transition-all duration-300 select-none z-10"
+            style={{ letterSpacing: '0.12em' }}
+          >
+            Архивъ Фотографій
+          </a>
           <div className="my-8 text-2xl text-center select-none">
             ☙ ━━━━━ ❦ ━━━━━ ❧
           </div>
