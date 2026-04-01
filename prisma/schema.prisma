@@ -1,0 +1,24 @@
+// This is your Prisma schema file, describing your database models.
+// Adjust the model as needed for your app.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Example {
+  id    Int    @id @default(autoincrement())
+  name  String
+  createdAt DateTime @default(now())
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  filename  String   @unique // имя файла или путь
+  title     String?  // подпись или заголовок
+  createdAt DateTime @default(now())
+}
