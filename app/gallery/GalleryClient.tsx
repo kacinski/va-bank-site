@@ -55,7 +55,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
   }, [modalIdx]);
 
   return (
-    <main className="min-h-screen w-full flex justify-center items-start relative">
+    <main className="relative flex min-h-screen w-full items-start justify-center px-3 py-6 sm:px-4 md:py-10">
       {/* Modal Overlay */}
       {modalIdx !== null && photos[modalIdx] && (
         <div
@@ -100,11 +100,15 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
           </div>
         </div>
       )}
-      <div className="max-w-4xl mx-auto bg-[#F4F1E1] text-[#2C2416] border-[6px] border-double border-[#2C2416] p-10 md:p-16 rounded-none">
+      <div className="mx-auto w-full max-w-4xl bg-[#F4F1E1] px-4 py-8 text-[#2C2416] sm:px-6 md:border-[6px] md:border-double md:border-[#2C2416] md:px-10 md:py-12 lg:px-16">
         {/* Navigation */}
-        <div className="mb-6">
+        <div className="mb-6 flex gap-4 items-center">
           <Link href="/" className="inline-block font-serif text-[#6B5B3E] text-base md:text-lg italic underline underline-offset-4 hover:text-imperial-burgundy transition select-none">
             ← Вернуться къ расписанію
+          </Link>
+          <span className="text-[#C2B59B] select-none">|</span>
+          <Link href="/memes" className="inline-block font-serif text-[#6B5B3E] text-base md:text-lg italic underline underline-offset-4 hover:text-imperial-burgundy transition select-none">
+            Мемы
           </Link>
         </div>
         {/* Header */}
@@ -114,22 +118,22 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
           <div className="my-2 text-2xl select-none">☙ ━━━━━ ❦ ━━━━━ ❧</div>
         </div>
         {/* Upload Form */}
-        <form className="mb-8 flex flex-col sm:flex-row gap-2 items-center" onSubmit={handleUpload} encType="multipart/form-data">
+        <form className="mb-8 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center" onSubmit={handleUpload} encType="multipart/form-data">
           <input
             type="file"
             name="file"
             accept="image/*"
             required
             ref={fileInputRef}
-            className="border px-2 py-1 rounded"
+            className="min-w-0 w-full rounded border px-2 py-1 sm:w-auto"
           />
           <input
             type="text"
             name="title"
             placeholder="Подпись (необязательно)"
-            className="border px-2 py-1 rounded"
+            className="min-w-0 w-full rounded border px-2 py-1 sm:w-auto sm:flex-1"
           />
-          <button type="submit" disabled={uploading} className="bg-[#222] text-white px-4 py-2 rounded hover:bg-[#444] disabled:opacity-50">
+          <button type="submit" disabled={uploading} className="rounded bg-[#222] px-4 py-2 text-white hover:bg-[#444] disabled:opacity-50 sm:w-auto">
             {uploading ? "Загрузка..." : "Загрузить фото"}
           </button>
         </form>

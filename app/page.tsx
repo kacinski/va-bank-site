@@ -90,8 +90,8 @@ export default async function HomePage() {
           mixBlendMode: 'multiply',
         }}
       />
-      <main className="min-h-screen w-full flex justify-center items-start relative">
-        <div className="max-w-4xl mx-auto bg-[#F4F1E1] text-[#2C2416] border-[6px] border-double border-[#2C2416] p-10 md:p-16 shadow-[15px_15px_0px_rgba(44,36,22,0.15)] rounded-none relative">
+      <main className="relative flex min-h-screen w-full items-start justify-center px-3 py-6 sm:px-4 md:py-10">
+        <div className="relative mx-auto w-full max-w-4xl overflow-hidden bg-[#F4F1E1] px-4 py-8 text-[#2C2416] shadow-[15px_15px_0px_rgba(44,36,22,0.15)] sm:px-6 md:border-[6px] md:border-double md:border-[#2C2416] md:px-10 md:py-12 lg:px-16">
           {/* Decorative Header */}
           <section className="text-center mb-8">
             {/* --- NEW GRID HEADER --- */}
@@ -107,27 +107,27 @@ export default async function HomePage() {
               const datelineCity = `Кішиневъ`;
               const datelineDate = `${day} ${month} ${year} г.`;
               return (
-                <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center w-full mb-2">
+                <div className="mb-2 grid w-full grid-cols-1 items-center gap-3 md:grid-cols-[1fr_auto_1fr] md:gap-4">
                   {/* Left: Logo */}
-                  <div className="flex justify-start">
+                  <div className="flex justify-center md:justify-start">
                     <img
                       src="/images/bessarabskie-vedomosti.png"
                       alt="Бессарабскія Вѣдомости"
-                      className="h-32 w-auto object-contain max-w-xs mx-auto"
+                      className="mx-auto h-24 w-auto max-w-full object-contain sm:h-28 md:mx-0 md:h-32 md:max-w-xs"
                     />
                   </div>
                   {/* Center: Title */}
                   <div className="flex justify-center">
-                    <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-widest whitespace-nowrap">
+                    <h1 className="text-center font-heading text-3xl font-bold tracking-[0.14em] text-balance sm:text-4xl md:text-5xl md:whitespace-nowrap">
                       Ва Банк<span className="text-imperial-gold text-6xl align-middle">Ъ</span>
                     </h1>
                   </div>
                   {/* Right: Dynamic Date */}
-                  <div className="flex flex-col items-end justify-end leading-tight">
-                    <span className="font-serif text-[#2C2416]/90 text-sm md:text-base select-none">
+                  <div className="flex flex-col items-center justify-end leading-tight md:items-end">
+                    <span className="select-none font-serif text-sm text-[#2C2416]/90 md:text-base">
                       {datelineCity}
                     </span>
-                    <span className="font-serif text-[#2C2416]/90 text-sm md:text-base select-none">
+                    <span className="select-none font-serif text-sm text-[#2C2416]/90 md:text-base">
                       {datelineDate}
                     </span>
                   </div>
@@ -195,7 +195,7 @@ export default async function HomePage() {
           {/* Vintage Bookmark Gallery Link */}
           <a
             href="/gallery"
-            className="absolute top-0 right-6 md:right-12 bg-[#2C2416] text-[#F4F1E1] px-4 py-3 shadow-md rounded-b-lg font-serif tracking-widest uppercase text-xs md:text-sm font-bold hover:pt-4 transition-all duration-300 select-none z-10"
+            className="absolute right-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-b-lg bg-[#2C2416] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#F4F1E1] shadow-md transition-all duration-300 select-none hover:pt-3 sm:px-4 sm:py-3 sm:text-xs md:right-12 md:top-0 md:text-sm"
             style={{ letterSpacing: '0.12em' }}
           >
             Архивъ Фотографій

@@ -152,8 +152,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply font-sans;
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground;
+    overflow-x: clip;
     /* Newspaper background fallback */
     background: linear-gradient(135deg, #F7F3E3 60%, #E2D3B1 100%);
     background-blend-mode: multiply;
@@ -171,8 +176,5 @@
     z-index: 2;
     /* Optional: deckled edge border image */
     /* border-image: url('/deckle-border.png') 30 repeat; border-width: 12px; border-style: solid; border-color: transparent; */
-  }
-  html {
-    @apply font-sans;
   }
 }
