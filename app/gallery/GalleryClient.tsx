@@ -107,8 +107,14 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
   const photoSections = buildSections(photos);
   const fetchPhotos = () => {
     fetch("/api/photos")
-      .then((res) => res.json())
-      .then((photos) => setPhotos(photos));
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Не удалось загрузить фотографии");
+        }
+        return res.json();
+      })
+      .then((photos) => setPhotos(photos))
+      .catch(() => setUploadError("Ошибка загрузки фотографий"));
   };
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,6 +142,10 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    fetchPhotos();
   }, []);
 
   // Keyboard navigation for modal
