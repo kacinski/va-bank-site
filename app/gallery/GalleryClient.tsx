@@ -273,7 +273,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
           </button>
         </form>
         {uploadError && <div className="text-red-600 mb-4">{uploadError}</div>}
-        <nav className="mb-8 border-y-2 border-[#2C2416] bg-[#EAE5D9]/70 py-4 md:hidden">
+        <nav className="sticky top-0 z-40 mb-8 -mx-4 border-y-2 border-[#2C2416] bg-[#EAE5D9]/95 px-4 py-3 backdrop-blur-sm md:hidden sm:-mx-6 sm:px-6">
           <div className="mb-3 font-heading text-lg tracking-wide">Переход к игре</div>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {photoSections.map((section) => (
@@ -289,7 +289,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
         </nav>
         <div className="space-y-10">
           {photoSections.map((section) => (
-            <section key={section.key} id={getSectionAnchor(section.key)} className="scroll-mt-24">
+            <section key={section.key} id={getSectionAnchor(section.key)} className="scroll-mt-40 md:scroll-mt-24">
               <div className="mb-5 border-b-2 border-[#2C2416] pb-2">
                 <h2 className="font-heading text-2xl md:text-3xl tracking-wide">Игра от {section.title}</h2>
               </div>
