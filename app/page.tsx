@@ -25,21 +25,45 @@ async function getGamesData() {
   };
 }
 
+async function fetchWithTimeout(input: string, init: RequestInit, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function getRandomFactWithTranslation() {
   try {
-    const res = await fetch("https://uselessfacts.jsph.pl/random.json?language=en", { cache: "no-store" });
+    const res = await fetchWithTimeout(
+      "https://uselessfacts.jsph.pl/random.json?language=en",
+      {
+        next: { revalidate: 900 },
+      },
+      1200
+    );
     if (!res.ok) throw new Error("Failed to fetch fact");
-    const data = await res.json();
+    const data = await res.json() as { text?: string };
     const original = data.text || "Факт не найден.";
     let translated = "";
     try {
-      const tr = await fetch("https://libretranslate.de/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q: original, source: "en", target: "ru", format: "text" })
-      });
+      const tr = await fetchWithTimeout(
+        "https://libretranslate.de/translate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ q: original, source: "en", target: "ru", format: "text" }),
+        },
+        1200
+      );
       if (tr.ok) {
-        const trData = await tr.json();
+        const trData = await tr.json() as { translatedText?: string };
         translated = trData.translatedText || "";
       }
     } catch {}
