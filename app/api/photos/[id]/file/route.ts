@@ -1,27 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import path from "path";
-import { promises as fs } from "fs";
 
 export const runtime = "nodejs";
-
-async function findFileByName(rootDir: string, fileName: string): Promise<string | null> {
-  const entries = await fs.readdir(rootDir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(rootDir, entry.name);
-
-    if (entry.isFile() && entry.name === fileName) {
-      return fullPath;
-    }
-
-    if (entry.isDirectory()) {
-      const found = await findFileByName(fullPath, fileName);
-      if (found) return found;
-    }
-  }
-
-  return null;
-}
 
 export async function GET(
   _request: Request,
@@ -58,36 +37,5 @@ export async function GET(
     });
   }
 
-  // Legacy fallback for records created before fileData existed.
-  const galleryRoot = path.join(process.cwd(), "public/images/galary");
-  const fallbackPath = path.join(galleryRoot, photo.folder || "", photo.filename);
-
-  try {
-    const fallbackData = await fs.readFile(fallbackPath);
-    return new Response(fallbackData, {
-      status: 200,
-      headers: {
-        "Content-Type": photo.mimeType || "application/octet-stream",
-        "Cache-Control": "public, max-age=300",
-      },
-    });
-  } catch {
-    try {
-      const recursivePath = await findFileByName(galleryRoot, photo.filename);
-      if (recursivePath) {
-        const fallbackData = await fs.readFile(recursivePath);
-        return new Response(fallbackData, {
-          status: 200,
-          headers: {
-            "Content-Type": photo.mimeType || "application/octet-stream",
-            "Cache-Control": "public, max-age=300",
-          },
-        });
-      }
-    } catch {
-      // Ignore recursive search errors and return 404 below.
-    }
-
-    return new Response("Photo data missing", { status: 404 });
-  }
+  return new Response("Photo data missing in DB", { status: 404 });
 }
