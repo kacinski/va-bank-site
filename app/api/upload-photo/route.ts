@@ -1,9 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import path from "path";
-import { promises as fs } from "fs";
 
-export const runtime = "nodejs"; // Ensure Node.js runtime for file system access
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   // Parse multipart form data
@@ -20,26 +18,16 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Invalid game date" }), { status: 400 });
   }
 
-  // Save file to public/images/galary/<game folder>
+  // Persist binary data in DB (Vercel-friendly: no filesystem writes in function bundle).
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const uploadRoot = path.join(process.cwd(), "public/images/galary");
-  const uploadDir = path.join(uploadRoot, buildGameFolder(gameDate));
-  await fs.mkdir(uploadDir, { recursive: true });
 
   // Generate unique filename
-  const ext = path.extname(file.name) || ".jpg";
-  const base = path.basename(file.name, ext);
-  let filename = base + "-" + Date.now() + ext;
-  let filePath = path.join(uploadDir, filename);
-  // Ensure no overwrite
-  let i = 1;
-  while (await fileExists(filePath)) {
-    filename = `${base}-${Date.now()}-${i}${ext}`;
-    filePath = path.join(uploadDir, filename);
-    i++;
-  }
-  await fs.writeFile(filePath, buffer);
+  const normalizedName = file.name || "photo.jpg";
+  const dot = normalizedName.lastIndexOf(".");
+  const ext = dot > -1 ? normalizedName.slice(dot) : ".jpg";
+  const base = dot > -1 ? normalizedName.slice(0, dot) : normalizedName;
+  const filename = `${base}-${Date.now()}${ext}`;
 
   // Save to DB (binary + metadata)
   await prisma.photo.create({
@@ -62,13 +50,4 @@ function buildGameFolder(gameDate: Date | null) {
   const day = target.getUTCDate();
   const year = target.getUTCFullYear();
   return `${day} ${monthName} ${year}`;
-}
-
-async function fileExists(filePath: string) {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
 }
