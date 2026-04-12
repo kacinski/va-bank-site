@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Photo"
+ADD COLUMN IF NOT EXISTS "gameDate" TIMESTAMP(3);

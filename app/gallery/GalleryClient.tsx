@@ -23,8 +23,36 @@ const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   year: "numeric",
 });
 
+function parseDateFromFilename(filename: string): Date | null {
+  const match = filename.match(/^(\d{1,2})_(\d{1,2})_(\d{4})/);
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
+    return null;
+  }
+
+  if (day < 1 || day > 31 || month < 1 || month > 12) {
+    return null;
+  }
+
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
 function getSectionDate(photo: Photo) {
-  return photo.gameDate ?? photo.createdAt;
+  if (photo.gameDate) {
+    return new Date(photo.gameDate);
+  }
+
+  const filenameDate = parseDateFromFilename(photo.filename);
+  if (filenameDate) {
+    return filenameDate;
+  }
+
+  return new Date(photo.createdAt);
 }
 
 function getSectionKey(photo: Photo) {
@@ -54,15 +82,24 @@ function buildSections(photos: Photo[]): PhotoSection[] {
     });
   }
 
-  return Array.from(sections.values());
+  return Array.from(sections.values()).sort((a, b) => {
+    if (a.key > b.key) return 1;
+    if (a.key < b.key) return -1;
+    return 0;
+  });
 }
 
 function getSectionAnchor(sectionKey: string) {
   return `game-${sectionKey}`;
 }
 
+function getPhotoSrc(photoId: number) {
+  return `/api/photos/${photoId}/file`;
+}
+
 export default function GalleryClient({ photos: initialPhotos }: { photos: Photo[] }) {
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const gameDateRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -97,6 +134,10 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
   const showPrev = () => setModalIdx(modalIdx !== null ? (modalIdx + photos.length - 1) % photos.length : null);
   const showNext = () => setModalIdx(modalIdx !== null ? (modalIdx + 1) % photos.length : null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Keyboard navigation for modal
   useEffect(() => {
     if (modalIdx === null) return;
@@ -113,6 +154,16 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [modalIdx]);
 
+  if (!mounted) {
+    return (
+      <main className="relative flex min-h-screen w-full items-start justify-center px-3 py-6 sm:px-4 md:py-10">
+        <div className="mx-auto w-full max-w-4xl bg-[#F4F1E1] px-4 py-8 text-[#2C2416] sm:px-6 md:border-[6px] md:border-double md:border-[#2C2416] md:px-10 md:py-12 lg:px-16">
+          <div className="text-center font-serif text-lg">Загрузка архива...</div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="relative flex min-h-screen w-full items-start justify-center px-3 py-6 sm:px-4 md:py-10">
       {/* Modal Overlay */}
@@ -125,7 +176,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
             onClick={e => e.stopPropagation()}
           >
             <img
-              src={`/images/galary/${photos[modalIdx].filename}`}
+              src={getPhotoSrc(photos[modalIdx].id)}
               alt={photos[modalIdx].title || photos[modalIdx].filename}
               className="rounded border-4 border-[#EAE5D9] object-contain max-h-[85vh] bg-[#EAE5D9]"
             />
@@ -160,25 +211,23 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
         </div>
       )}
       <div className="mx-auto flex w-full max-w-6xl items-start md:gap-0">
-        {photoSections.length > 1 && (
-          <nav className="sticky top-24 hidden w-32 shrink-0 flex-col pt-28 md:flex lg:w-40">
-            <div className="mb-4 pl-3 font-heading text-sm uppercase tracking-[0.16em] text-[#6B5B3E]">
-              Игры
-            </div>
-            <div className="flex flex-col gap-2">
-              {photoSections.map((section) => (
-                <a
-                  key={section.key}
-                  href={`#${getSectionAnchor(section.key)}`}
-                  className="relative -mr-px border-2 border-r-0 border-[#2C2416] bg-[#E7D9B8] px-3 py-3 font-serif text-sm leading-tight text-[#2C2416] shadow-[6px_6px_0px_rgba(44,36,22,0.10)] transition hover:bg-[#2C2416] hover:text-[#F4F1E1]"
-                >
-                  <span className="block text-[10px] uppercase tracking-[0.16em] opacity-70">Игра</span>
-                  <span className="mt-1 block">{section.title}</span>
-                </a>
-              ))}
-            </div>
-          </nav>
-        )}
+        <nav className="sticky top-24 hidden w-32 shrink-0 flex-col pt-28 md:flex lg:w-40">
+          <div className="mb-4 pl-3 font-heading text-sm uppercase tracking-[0.16em] text-[#6B5B3E]">
+            Игры
+          </div>
+          <div className="flex flex-col gap-2">
+            {photoSections.map((section) => (
+              <a
+                key={section.key}
+                href={`#${getSectionAnchor(section.key)}`}
+                className="relative -mr-px border-2 border-r-0 border-[#2C2416] bg-[#E7D9B8] px-3 py-3 font-serif text-sm leading-tight text-[#2C2416] shadow-[6px_6px_0px_rgba(44,36,22,0.10)] transition hover:bg-[#2C2416] hover:text-[#F4F1E1]"
+              >
+                <span className="block text-[10px] uppercase tracking-[0.16em] opacity-70">Игра</span>
+                <span className="mt-1 block">{section.title}</span>
+              </a>
+            ))}
+          </div>
+        </nav>
         <div className="relative w-full bg-[#F4F1E1] px-4 py-8 text-[#2C2416] sm:px-6 md:border-[6px] md:border-double md:border-[#2C2416] md:px-10 md:py-12 lg:px-16">
         {/* Navigation */}
         <div className="mb-6 flex gap-4 items-center">
@@ -224,22 +273,20 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
           </button>
         </form>
         {uploadError && <div className="text-red-600 mb-4">{uploadError}</div>}
-        {photoSections.length > 1 && (
-          <nav className="mb-8 border-y-2 border-[#2C2416] bg-[#EAE5D9]/70 py-4 md:hidden">
-            <div className="mb-3 font-heading text-lg tracking-wide">Переход к игре</div>
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              {photoSections.map((section) => (
-                <a
-                  key={section.key}
-                  href={`#${getSectionAnchor(section.key)}`}
-                  className="shrink-0 border border-[#2C2416] bg-[#F4F1E1] px-3 py-2 font-serif text-sm transition hover:bg-[#2C2416] hover:text-[#F4F1E1]"
-                >
-                  {section.title}
-                </a>
-              ))}
-            </div>
-          </nav>
-        )}
+        <nav className="mb-8 border-y-2 border-[#2C2416] bg-[#EAE5D9]/70 py-4 md:hidden">
+          <div className="mb-3 font-heading text-lg tracking-wide">Переход к игре</div>
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {photoSections.map((section) => (
+              <a
+                key={section.key}
+                href={`#${getSectionAnchor(section.key)}`}
+                className="shrink-0 border border-[#2C2416] bg-[#F4F1E1] px-3 py-2 font-serif text-sm transition hover:bg-[#2C2416] hover:text-[#F4F1E1]"
+              >
+                {section.title}
+              </a>
+            ))}
+          </div>
+        </nav>
         <div className="space-y-10">
           {photoSections.map((section) => (
             <section key={section.key} id={getSectionAnchor(section.key)} className="scroll-mt-24">
@@ -259,7 +306,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
                     >
                       <div className="mb-3 overflow-hidden rounded-none">
                         <img
-                          src={`/images/galary/${photo.filename}`}
+                          src={getPhotoSrc(photo.id)}
                           alt={photo.title || photo.filename}
                           className="h-64 w-full object-cover border border-[#B6A88A]"
                         />

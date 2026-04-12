@@ -1,9 +1,19 @@
-import { NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
-
-export async function GET(req: NextRequest) {
-  const photos = await prisma.photo.findMany({ orderBy: { filename: 'asc' } });
+export async function GET() {
+  const photos = await prisma.photo.findMany({
+    select: {
+      id: true,
+      filename: true,
+      title: true,
+      gameDate: true,
+      createdAt: true,
+    },
+    orderBy: [
+      { gameDate: 'desc' },
+      { createdAt: 'desc' },
+      { filename: 'asc' },
+    ],
+  });
   return Response.json(photos);
 }

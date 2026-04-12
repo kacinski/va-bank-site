@@ -13,7 +13,7 @@ async function main() {
     const existingPhoto = await prisma.photo.findFirst({ where: { filename } });
     if (!existingPhoto) {
       await prisma.photo.create({
-        data: { filename, title: null },
+        data: { filename, title: null, gameDate: null },
       });
     }
     console.log('Imported:', filename);

@@ -1,9 +1,20 @@
-
 import GalleryClient from "./GalleryClient";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 export default async function GalleryPage() {
-  const prisma = new PrismaClient();
-  const photos = await prisma.photo.findMany({ orderBy: { filename: "asc" } });
+  const photos = await prisma.photo.findMany({
+    select: {
+      id: true,
+      filename: true,
+      title: true,
+      gameDate: true,
+      createdAt: true,
+    },
+    orderBy: [
+      { gameDate: "desc" },
+      { createdAt: "desc" },
+      { filename: "asc" },
+    ],
+  });
   return <GalleryClient photos={photos} />;
 }

@@ -17,6 +17,10 @@ model Photo {
   id        Int      @id @default(autoincrement())
   filename  String
   title     String?
+  gameDate  DateTime?
+  mimeType  String?
+  fileData  Bytes?
+  folder    String?
   createdAt DateTime @default(now())
 }
 
