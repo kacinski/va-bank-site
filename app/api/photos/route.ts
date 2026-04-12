@@ -6,6 +6,7 @@ export async function GET() {
       id: true,
       filename: true,
       title: true,
+      folder: true,
       gameDate: true,
       createdAt: true,
     },

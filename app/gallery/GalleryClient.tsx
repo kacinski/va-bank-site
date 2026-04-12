@@ -7,6 +7,7 @@ type Photo = {
   id: number;
   filename: string;
   title: string | null;
+  folder?: string | null;
   gameDate?: string | Date | null;
   createdAt: string | Date;
 };
@@ -93,8 +94,16 @@ function getSectionAnchor(sectionKey: string) {
   return `game-${sectionKey}`;
 }
 
-function getPhotoSrc(photoId: number) {
-  return `/api/photos/${photoId}/file`;
+function getPhotoSrc(photo: Photo) {
+  if (photo.folder) {
+    const folderPath = photo.folder
+      .split("/")
+      .map((part) => encodeURIComponent(part))
+      .join("/");
+    return `/images/galary/${folderPath}/${encodeURIComponent(photo.filename)}`;
+  }
+
+  return `/api/photos/${photo.id}/file`;
 }
 
 export default function GalleryClient({ photos: initialPhotos }: { photos: Photo[] }) {
@@ -186,7 +195,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
             onClick={e => e.stopPropagation()}
           >
             <img
-              src={getPhotoSrc(photos[modalIdx].id)}
+              src={getPhotoSrc(photos[modalIdx])}
               alt={photos[modalIdx].title || photos[modalIdx].filename}
               className="rounded border-4 border-[#EAE5D9] object-contain max-h-[85vh] bg-[#EAE5D9]"
             />
@@ -316,7 +325,7 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
                     >
                       <div className="mb-3 overflow-hidden rounded-none">
                         <img
-                          src={getPhotoSrc(photo.id)}
+                          src={getPhotoSrc(photo)}
                           alt={photo.title || photo.filename}
                           className="h-64 w-full object-cover border border-[#B6A88A]"
                         />
