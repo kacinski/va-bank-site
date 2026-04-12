@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -35,6 +35,16 @@ export async function GET(
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
+  }
+
+  if (photo.folder) {
+    const folderPath = photo.folder
+      .split("/")
+      .map((part) => encodeURIComponent(part))
+      .join("/");
+    const filePath = encodeURIComponent(photo.filename);
+    const staticUrl = new URL(`/images/galary/${folderPath}/${filePath}`, request.url);
+    return Response.redirect(staticUrl, 307);
   }
 
   return new Response("Photo data missing in DB", { status: 404 });
