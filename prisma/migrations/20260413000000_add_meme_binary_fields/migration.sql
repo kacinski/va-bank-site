@@ -1,0 +1,3 @@
+ALTER TABLE "Meme"
+ADD COLUMN "mimeType" TEXT,
+ADD COLUMN "fileData" BYTEA;

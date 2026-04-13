@@ -24,13 +24,19 @@ export default function MemesClient({ memes: initialMemes }: { memes: Meme[] }) 
     e.preventDefault();
     setUploadError(null);
     setUploading(true);
-    const formData = new FormData(e.currentTarget);
     const files = fileInputRef.current?.files;
     if (!files || files.length === 0) {
       setUploadError("Выберите хотя бы один файл");
       setUploading(false);
       return;
     }
+
+    const formData = new FormData();
+    const titleInput = (e.currentTarget.elements.namedItem("title") as HTMLInputElement | null)?.value || "";
+    if (titleInput) {
+      formData.append("title", titleInput);
+    }
+
     for (let i = 0; i < files.length; i++) {
       formData.append("files", files[i]);
     }
@@ -88,7 +94,7 @@ export default function MemesClient({ memes: initialMemes }: { memes: Meme[] }) 
             <div key={meme.id} className="bg-[#EAE5D9] p-3 border border-[#C2B59B] rounded-none w-full text-left relative">
               <div className="overflow-hidden rounded-none mb-3">
                 <img
-                  src={`/images/memes/${meme.filename}`}
+                  src={`/api/memes/${meme.id}/file`}
                   alt={meme.title || meme.filename}
                   className="w-full h-64 object-cover border border-[#B6A88A]"
                 />

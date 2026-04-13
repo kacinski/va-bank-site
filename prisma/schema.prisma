@@ -28,5 +28,7 @@ model Meme {
   id        Int      @id @default(autoincrement())
   filename  String
   title     String?
+  mimeType  String?
+  fileData  Bytes?
   createdAt DateTime @default(now())
 }
