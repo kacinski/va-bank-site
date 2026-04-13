@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 type Meme = { id: number; filename: string; title: string | null };
 
@@ -11,12 +11,21 @@ export default function MemesClient({ memes: initialMemes }: { memes: Meme[] }) 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Загрузить мемы на начальную загрузку страницы
+  useEffect(() => {
+    fetchMemes();
+  }, []);
+
   // Получить свежий список мемов из API
   const fetchMemes = async () => {
-    const res = await fetch("/api/memes");
-    if (res.ok) {
-      const allMemes = await res.json();
-      setMemes(allMemes);
+    try {
+      const res = await fetch("/api/memes");
+      if (res.ok) {
+        const allMemes = await res.json();
+        setMemes(allMemes);
+      }
+    } catch (error) {
+      console.error("Ошибка загрузки мемов:", error);
     }
   };
 
