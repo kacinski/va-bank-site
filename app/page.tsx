@@ -193,8 +193,8 @@ export default async function HomePage() {
                       const date = match ? match[1] : game.dateTime;
                       const weekday = match ? match[2] : "";
                       const time = match ? match[3] : "";
-                      // Strike through the first 3 games (already played)
-                      const isPast = idx < 3;
+                      // Strike through the first 4 games (already played, including 18 April)
+                      const isPast = idx < 4;
                       const tdClass = "border-b border-dashed border-[#2C2416]/40 py-3" + (isPast ? " line-through text-[#A9A9A9]" : "");
                       return (
                         <tr key={game.number} className="rounded-none">
