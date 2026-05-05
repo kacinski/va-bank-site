@@ -178,10 +178,6 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    fetchPhotos();
-  }, []);
-
   // Keyboard navigation for modal
   useEffect(() => {
     if (modalIdx === null) return;
