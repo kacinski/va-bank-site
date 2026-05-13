@@ -125,7 +125,7 @@ function getPhotoSrc(photo: Photo) {
   const folder = photo.folder || getFolderFromGameDate(photo.gameDate);
 
   if (folder) {
-    return `/images/galary/${encodeURIComponent(folder)}/${encodeURIComponent(photo.filename)}`;
+    return `/images/gallery/${encodeURIComponent(folder)}/${encodeURIComponent(photo.filename)}`;
   }
 
   return `/api/photos/${photo.id}/file`;

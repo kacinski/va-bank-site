@@ -43,7 +43,7 @@ export async function GET(
       .map((part) => encodeURIComponent(part))
       .join("/");
     const filePath = encodeURIComponent(photo.filename);
-    const staticUrl = new URL(`/images/galary/${folderPath}/${filePath}`, request.url);
+    const staticUrl = new URL(`/images/gallery/${folderPath}/${filePath}`, request.url);
     return Response.redirect(staticUrl, 307);
   }
 

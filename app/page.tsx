@@ -1,19 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// SVG mask for deckled edge
-const DeckledMask = () => (
-  <svg width="0" height="0">
-    <defs>
-      <mask id="deckle" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
-        <rect x="0" y="0" width="1" height="1" fill="white" />
-        <path d="M0,0 Q0.02,0.04 0.04,0 Q0.08,0.06 0.12,0 Q0.16,0.04 0.2,0 Q0.24,0.06 0.28,0 Q0.32,0.04 0.36,0 Q0.4,0.06 0.44,0 Q0.48,0.04 0.52,0 Q0.56,0.06 0.6,0 Q0.64,0.04 0.68,0 Q0.72,0.06 0.76,0 Q0.8,0.04 0.84,0 Q0.88,0.06 0.92,0 Q0.96,0.04 1,0 V1 Q0.96,0.96 0.92,1 Q0.88,0.94 0.84,1 Q0.8,0.96 0.76,1 Q0.72,0.94 0.68,1 Q0.64,0.96 0.6,1 Q0.56,0.94 0.52,1 Q0.48,0.96 0.44,1 Q0.4,0.94 0.36,1 Q0.32,0.96 0.28,1 Q0.24,0.94 0.2,1 Q0.16,0.96 0.12,1 Q0.08,0.94 0.04,1 Q0.02,0.96 0,1 Z" fill="black" />
-      </mask>
-    </defs>
-  </svg>
-);
+export const revalidate = 900;
 
 async function getGamesData() {
   const filePath = path.join(process.cwd(), "data/games.json");
@@ -43,10 +31,8 @@ async function getRandomFactWithTranslation() {
   try {
     const res = await fetchWithTimeout(
       "https://uselessfacts.jsph.pl/random.json?language=en",
-      {
-        next: { revalidate: 900 },
-      },
-      1200
+      { next: { revalidate: 900 } },
+      3000
     );
     if (!res.ok) throw new Error("Failed to fetch fact");
     const data = await res.json() as { text?: string };
@@ -54,17 +40,13 @@ async function getRandomFactWithTranslation() {
     let translated = "";
     try {
       const tr = await fetchWithTimeout(
-        "https://libretranslate.de/translate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ q: original, source: "en", target: "ru", format: "text" }),
-        },
-        1200
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(original)}&langpair=en|ru`,
+        {},
+        3000
       );
       if (tr.ok) {
-        const trData = await tr.json() as { translatedText?: string };
-        translated = trData.translatedText || "";
+        const trData = await tr.json() as { responseData?: { translatedText?: string } };
+        translated = trData.responseData?.translatedText || "";
       }
     } catch {}
     return { original, translated };
@@ -84,36 +66,8 @@ export default async function HomePage() {
     ? Object.keys(results[0]).filter(k => k.startsWith("game"))
     : [];
 
-  // URL to your muted, sepia-toned, cluttered newspaper background image
-  const backgroundUrl = "/cluttered-newspapers.jpg";
-
   return (
     <>
-      {/* Muted, sepia, blurred, cluttered newspaper background */}
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 w-full h-full"
-        style={{
-          backgroundImage: `url('${backgroundUrl}')`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'repeat',
-          backgroundPosition: 'center',
-          filter: 'sepia(0.7) brightness(0.85) blur(1px)',
-          opacity: 1,
-        }}
-      />
-      {/* Paper grain overlay for all layers */}
-      <div
-        aria-hidden
-        className="fixed inset-0 pointer-events-none -z-10"
-        style={{
-          opacity: 0.18,
-          backgroundImage:
-            "url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\' fill=\'none\'><filter id=\'n\' x=\'0\' y=\'0\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/></filter><rect width=\'120\' height=\'120\' filter=\'url(%23n)\' opacity=\'0.5\'/></svg>')",
-          backgroundSize: '220px 220px',
-          mixBlendMode: 'multiply',
-        }}
-      />
       <main className="relative flex min-h-screen w-full items-start justify-center px-3 py-6 sm:px-4 md:py-10">
         <div className="relative mx-auto w-full max-w-4xl overflow-hidden bg-[#F4F1E1] px-4 py-8 text-[#2C2416] shadow-[15px_15px_0px_rgba(44,36,22,0.15)] sm:px-6 md:border-[6px] md:border-double md:border-[#2C2416] md:px-10 md:py-12 lg:px-16">
           {/* Decorative Header */}
@@ -188,13 +142,12 @@ export default async function HomePage() {
                 </thead>
                 <tbody>
                   {upcoming.length > 0 ? (
-                    upcoming.map((game: { number: number; dateTime: string; location: string }, idx: number) => {
+                    upcoming.map((game: { number: number; dateTime: string; isoDate: string; location: string }) => {
                       const match = game.dateTime.match(/^(.*?)\s*\((.*?)\),\s*(\d{1,2}:\d{2})$/);
                       const date = match ? match[1] : game.dateTime;
                       const weekday = match ? match[2] : "";
                       const time = match ? match[3] : "";
-                      // Strike through the first 4 games (already played, including 18 April)
-                      const isPast = idx < 4;
+                      const isPast = new Date(game.isoDate) < new Date();
                       const tdClass = "border-b border-dashed border-[#2C2416]/40 py-3" + (isPast ? " line-through text-[#A9A9A9]" : "");
                       return (
                         <tr key={game.number} className="rounded-none">
@@ -216,13 +169,20 @@ export default async function HomePage() {
             </div>
           </section>
 
-          {/* Vintage Bookmark Gallery Link */}
+          {/* Bookmark links */}
           <a
             href="/gallery"
             className="absolute right-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-b-lg bg-[#2C2416] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#F4F1E1] shadow-md transition-all duration-300 select-none hover:pt-3 sm:px-4 sm:py-3 sm:text-xs md:right-12 md:top-0 md:text-sm"
             style={{ letterSpacing: '0.12em' }}
           >
             Архивъ Фотографій
+          </a>
+          <a
+            href="/memes"
+            className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-b-lg bg-[#2C2416] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#F4F1E1] shadow-md transition-all duration-300 select-none hover:pt-3 sm:px-4 sm:py-3 sm:text-xs md:left-12 md:top-0 md:text-sm"
+            style={{ letterSpacing: '0.12em' }}
+          >
+            Мемы и Картинки
           </a>
           <div className="my-8 text-2xl text-center select-none">
             ☙ ━━━━━ ❦ ━━━━━ ❧
@@ -292,10 +252,10 @@ export default async function HomePage() {
               </div>
               <div>
                 <blockquote className="italic text-lg leading-relaxed">
-                  “{factObj.original}”
+                  "{factObj.translated || factObj.original}"
                 </blockquote>
                 {factObj.translated && (
-                  <p className="mt-2 text-[#2C2416]/80 text-base">{factObj.translated}</p>
+                  <p className="mt-3 text-[#2C2416]/50 text-sm italic">{factObj.original}</p>
                 )}
               </div>
             </div>
