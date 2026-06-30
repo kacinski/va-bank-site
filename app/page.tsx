@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { fetchLeaderboard } from "@/lib/leaderboard";
 
 export const revalidate = 900;
 
@@ -9,7 +10,6 @@ async function getGamesData() {
   const data = JSON.parse(file);
   return {
     upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
-    results: typeof data.results === "object" && data.results !== null ? data.results : {},
   };
 }
 
@@ -56,13 +56,13 @@ async function getRandomFactWithTranslation() {
 }
 
 export default async function HomePage() {
-  const [{ upcoming, results }, factObj] = await Promise.all([
+  const [{ upcoming }, results, factObj] = await Promise.all([
     getGamesData(),
-    getRandomFactWithTranslation()
+    fetchLeaderboard(),
+    getRandomFactWithTranslation(),
   ]);
 
-  // If results is an array (new format), extract game numbers dynamically
-  const gameNumbers = Array.isArray(results) && results.length > 0
+  const gameNumbers = results.length > 0
     ? Object.keys(results[0]).filter(k => k.startsWith("game"))
     : [];
 
@@ -212,7 +212,7 @@ export default async function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(results) && results.length > 0 ? (
+                  {results.length > 0 ? (
                     results.map((row) => {
                       const isVaBank = row.team.trim().toLowerCase().includes("ва-банк");
                       return (
