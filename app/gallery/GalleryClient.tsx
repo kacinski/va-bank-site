@@ -94,40 +94,7 @@ function getSectionAnchor(sectionKey: string) {
   return `game-${sectionKey}`;
 }
 
-function getFolderFromGameDate(gameDate: string | Date | null | undefined) {
-  if (!gameDate) return null;
-
-  const date = new Date(gameDate);
-  if (Number.isNaN(date.getTime())) return null;
-
-  const months = [
-    "января",
-    "февраля",
-    "марта",
-    "апреля",
-    "мая",
-    "июня",
-    "июля",
-    "августа",
-    "сентября",
-    "октября",
-    "ноября",
-    "декабря",
-  ];
-
-  const day = date.getUTCDate();
-  const month = months[date.getUTCMonth()];
-  const year = date.getUTCFullYear();
-  return `${day} ${month} ${year}`;
-}
-
 function getPhotoSrc(photo: Photo) {
-  const folder = photo.folder || getFolderFromGameDate(photo.gameDate);
-
-  if (folder) {
-    return `/images/gallery/${encodeURIComponent(folder)}/${encodeURIComponent(photo.filename)}`;
-  }
-
   return `/api/photos/${photo.id}/file`;
 }
 
