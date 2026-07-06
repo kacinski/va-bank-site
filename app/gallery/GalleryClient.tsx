@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
 type Photo = {
@@ -8,6 +9,7 @@ type Photo = {
   filename: string;
   title: string | null;
   folder?: string | null;
+  url?: string | null;
   gameDate?: string | Date | null;
   createdAt: string | Date;
 };
@@ -95,7 +97,7 @@ function getSectionAnchor(sectionKey: string) {
 }
 
 function getPhotoSrc(photo: Photo) {
-  return `/api/photos/${photo.id}/file`;
+  return photo.url ?? `/api/photos/${photo.id}/file`;
 }
 
 export default function GalleryClient({ photos: initialPhotos }: { photos: Photo[] }) {
@@ -311,11 +313,14 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
                       className="block w-full cursor-zoom-in border border-[#C2B59B] bg-[#EAE5D9] p-3 text-left rounded-none"
                       tabIndex={0}
                     >
-                      <div className="overflow-hidden rounded-none">
-                        <img
+                      <div className="relative h-64 w-full overflow-hidden rounded-none border border-[#B6A88A]">
+                        <Image
                           src={getPhotoSrc(photo)}
                           alt={photo.title || photo.filename}
-                          className="h-64 w-full object-contain border border-[#B6A88A]"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-contain"
+                          loading="lazy"
                         />
                       </div>
                     </button>

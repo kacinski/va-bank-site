@@ -21,6 +21,7 @@ model Photo {
   mimeType  String?
   fileData  Bytes?
   folder    String?
+  url       String?
   createdAt DateTime @default(now())
 }
 

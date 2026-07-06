@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -29,15 +30,21 @@ export async function POST(req: NextRequest) {
   const base = dot > -1 ? normalizedName.slice(0, dot) : normalizedName;
   const filename = `${base}-${Date.now()}${ext}`;
 
-  // Save to DB (binary + metadata)
+  // Upload to Vercel Blob
+  const blob = await put(`gallery/${filename}`, buffer, {
+    access: "public",
+    contentType: file.type || "application/octet-stream",
+  });
+
+  // Save metadata to DB (no binary data)
   await prisma.photo.create({
     data: {
       filename,
       title,
       gameDate,
       mimeType: file.type || "application/octet-stream",
-      fileData: buffer,
       folder: buildGameFolder(gameDate),
+      url: blob.url,
     },
   });
 

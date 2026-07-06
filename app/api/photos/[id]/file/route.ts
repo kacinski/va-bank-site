@@ -18,6 +18,7 @@ export async function GET(
     select: {
       filename: true,
       folder: true,
+      url: true,
       mimeType: true,
       fileData: true,
     },
@@ -25,6 +26,10 @@ export async function GET(
 
   if (!photo) {
     return new Response("Photo not found", { status: 404 });
+  }
+
+  if (photo.url) {
+    return Response.redirect(photo.url, 307);
   }
 
   if (photo.fileData) {
@@ -35,16 +40,6 @@ export async function GET(
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
-  }
-
-  if (photo.folder) {
-    const folderPath = photo.folder
-      .split("/")
-      .map((part) => encodeURIComponent(part))
-      .join("/");
-    const filePath = encodeURIComponent(photo.filename);
-    const staticUrl = new URL(`/images/gallery/${folderPath}/${filePath}`, request.url);
-    return Response.redirect(staticUrl, 307);
   }
 
   return new Response("Photo data missing in DB", { status: 404 });

@@ -10,6 +10,7 @@ export default async function GalleryPage() {
       filename: true,
       title: true,
       folder: true,
+      url: true,
       gameDate: true,
       createdAt: true,
     },
