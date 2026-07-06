@@ -344,15 +344,12 @@ export default function GalleryClient({ photos: initialPhotos }: { photos: Photo
                       className="block w-full cursor-zoom-in border border-[#C2B59B] bg-[#EAE5D9] p-3 text-left rounded-none"
                       tabIndex={0}
                     >
-                      <div className="mb-3 overflow-hidden rounded-none">
+                      <div className="overflow-hidden rounded-none">
                         <img
                           src={getPhotoSrc(photo)}
                           alt={photo.title || photo.filename}
-                          className="h-64 w-full object-cover border border-[#B6A88A]"
+                          className="h-64 w-full object-contain border border-[#B6A88A]"
                         />
-                      </div>
-                      <div className="mt-2 text-center font-serif text-base text-[#2C2416]">
-                        {photo.title || photo.filename}
                       </div>
                     </button>
                   );
