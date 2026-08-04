@@ -66,6 +66,25 @@ export default async function HomePage() {
     ? Object.keys(results[0]).filter(k => k.startsWith("game"))
     : [];
 
+  const medalsByGame: Record<string, [number, string][]> = {};
+  for (const num of gameNumbers) {
+    const distinctValues = Array.from(
+      new Set(
+        results
+          .map((row) => row[num])
+          .filter((v): v is number => typeof v === "number")
+      )
+    ).sort((a, b) => b - a);
+    const medals: ["🥇", "🥈", "🥉"] = ["🥇", "🥈", "🥉"];
+    medalsByGame[num] = distinctValues.slice(0, 3).map((value, idx) => [value, medals[idx]]);
+  }
+
+  function getMedal(num: string, value: unknown): string | null {
+    if (typeof value !== "number") return null;
+    const entry = medalsByGame[num]?.find(([v]) => v === value);
+    return entry ? entry[1] : null;
+  }
+
   return (
     <>
       <main className="relative flex min-h-screen w-full items-start justify-center px-3 py-6 sm:px-4 md:py-10">
@@ -219,11 +238,24 @@ export default async function HomePage() {
                         <tr key={row.team} className={isVaBank ? "bg-[#F9E9A9]/80" : ""}>
                           <td className="font-heading font-bold border-b border-dashed border-[#2C2416]/40 py-3 text-center">{row.rank}</td>
                           <td className={"font-heading font-bold border-b border-dashed border-[#2C2416]/40 py-3 text-left pl-6" + (isVaBank ? " text-imperial-burgundy" : "")}>{row.team}</td>
-                          {gameNumbers.map((num) => (
-                            <td className="border-b border-dashed border-[#2C2416]/40 py-3 text-center" key={num}>
-                              {row[num] !== null && row[num] !== undefined ? row[num] : "—"}
-                            </td>
-                          ))}
+                          {gameNumbers.map((num) => {
+                            const medal = getMedal(num, row[num]);
+                            return (
+                              <td
+                                key={num}
+                                className="border-b border-dashed border-[#2C2416]/40 py-3 text-center"
+                              >
+                                {row[num] !== null && row[num] !== undefined ? (
+                                  <>
+                                    {row[num]}
+                                    {medal && <span className="ml-1">{medal}</span>}
+                                  </>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                            );
+                          })}
                           <td className="font-bold border-b border-dashed border-[#2C2416]/40 py-3 text-center">
                             {row.total !== null && row.total !== undefined ? row.total : "—"}
                           </td>
